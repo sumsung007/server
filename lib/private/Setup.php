@@ -51,6 +51,7 @@ use OC\Preview\BackgroundCleanupJob;
 use OCP\Defaults;
 use OCP\IL10N;
 use OCP\ILogger;
+use OCP\IUser;
 use OCP\Security\ISecureRandom;
 
 class Setup {
@@ -366,6 +367,9 @@ class Setup {
 			$user = \OC::$server->getUserManager()->createUser($username, $password);
 			if (!$user) {
 				$error[] = "User <$username> could not be created.";
+			}
+			if ($user instanceof IUser && empty($options['adminemail']) === false) {
+				$user->setEMailAddress(htmlspecialchars_decode($options['adminemail']));
 			}
 		} catch(Exception $exception) {
 			$error[] = $exception->getMessage();
