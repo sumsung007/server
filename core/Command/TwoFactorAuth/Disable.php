@@ -62,7 +62,7 @@ class Disable extends Base {
 			return 1;
 		}
 		if ($this->manager->tryDisableProviderFor($providerId, $user)) {
-			$output->writeln("Two-factor provider <options=bold>$providerId</options> disabled for user <options=bold>$uid</options>.");
+			$output->writeln("Two-factor provider <options=bold>$providerId</> disabled for user <options=bold>$uid</>.");
 			return 0;
 		} else {
 			$output->writeln("<error>The provider does not support this operation.</error>");

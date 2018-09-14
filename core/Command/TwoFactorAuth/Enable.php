@@ -61,7 +61,7 @@ class Enable extends Base {
 			return 1;
 		}
 		if ($this->manager->tryEnableProviderFor($providerId, $user)) {
-			$output->writeln("Two-factor provider <options=bold>$providerId</options> enabled for user <options=bold>$uid</options>.");
+			$output->writeln("Two-factor provider <options=bold>$providerId</> enabled for user <options=bold>$uid</>.");
 			return 0;
 		} else {
 			$output->writeln("<error>The provider does not support this operation.</error>");
