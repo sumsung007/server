@@ -30,15 +30,31 @@ use OC\Authentication\Exceptions\InvalidProviderException;
 use OCP\Authentication\TwoFactorAuth\IActivatableByAdmin;
 use OCP\Authentication\TwoFactorAuth\IDeactivableByAdmin;
 use OCP\Authentication\TwoFactorAuth\IDeactivatableByAdmin;
+use OCP\Authentication\TwoFactorAuth\IProvider;
+use OCP\Authentication\TwoFactorAuth\IRegistry;
 use OCP\IUser;
 
 class ProviderManager {
 
-	/** @var Manager */
-	private $twoFactorManager;
+	/** @var ProviderLoader */
+	private $providerLoader;
 
-	public function __construct(Manager $twoFactorManager) {
-		$this->twoFactorManager = $twoFactorManager;
+	/** @var IRegistry */
+	private $providerRegistry;
+
+	public function __construct(ProviderLoader $providerLoader, IRegistry $providerRegistry) {
+		$this->providerLoader = $providerLoader;
+		$this->providerRegistry = $providerRegistry;
+	}
+
+	private function getProvider(string $providerId, IUser $user): IProvider {
+		$providers = $this->providerLoader->getProviders($user);
+
+		if (!isset($providers[$providerId])) {
+			throw new InvalidProviderException($providerId);
+		}
+
+		return $providers[$providerId];
 	}
 
 	/**
@@ -49,13 +65,11 @@ class ProviderManager {
 	 * @return bool whether the provider supports this operation
 	 */
 	public function tryEnableProviderFor(string $providerId, IUser $user): bool {
-		$provider = $this->twoFactorManager->getProvider($user, $providerId);
-		if (is_null($provider)) {
-			throw new InvalidProviderException($providerId);
-		}
+		$provider = $this->getProvider($providerId, $user);
 
 		if ($provider instanceof IActivatableByAdmin) {
 			$provider->enableFor($user);
+			$this->providerRegistry->enableProviderFor($provider, $user);
 			return true;
 		} else {
 			return false;
@@ -70,13 +84,11 @@ class ProviderManager {
 	 * @return bool whether the provider supports this operation
 	 */
 	public function tryDisableProviderFor(string $providerId, IUser $user): bool {
-		$provider = $this->twoFactorManager->getProvider($user, $providerId);
-		if (is_null($provider)) {
-			throw new InvalidProviderException($providerId);
-		}
+		$provider = $this->getProvider($providerId, $user);
 
 		if ($provider instanceof IDeactivatableByAdmin) {
 			$provider->disableFor($user);
+			$this->providerRegistry->disableProviderFor($provider, $user);
 			return true;
 		} else {
 			return false;
