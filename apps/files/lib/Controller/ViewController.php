@@ -176,7 +176,6 @@ class ViewController extends Controller {
 		$currentCount           = 0;
 		foreach ($favElements['folders'] as $dir) {
 
-			$id           = substr($dir, strrpos($dir, '/') + 1, strlen($dir));
 			$link         = $this->urlGenerator->linkToRoute('files.view.index', ['dir' => $dir, 'view' => 'files']);
 			$sortingValue = ++$currentCount;
 			$element      = [
@@ -186,7 +185,7 @@ class ViewController extends Controller {
 				'dir'                => $dir,
 				'order'              => $navBarPositionPosition,
 				'folderPosition'     => $sortingValue,
-				'name'               => $id,
+				'name'               => $this->getDirDisplayName($dir),
 				'icon'               => 'files',
 				'quickaccesselement' => 'true'
 			];
@@ -275,6 +274,20 @@ class ViewController extends Controller {
 		$response->setContentSecurityPolicy($policy);
 
 		return $response;
+	}
+
+	/**
+	 * Returns the last part of a directory path.
+	 * E.g. "/some/dir" -> "dir".
+	 *
+	 * @param string $dir The directory
+	 * @return string
+	 */
+	private function getDirDisplayName(string $dir): string {
+		if (substr($dir, -1) === '/') {
+			$dir = substr($dir, 0, -1);
+		}
+		return substr($dir, strrpos($dir, '/') + 1, strlen($dir));
 	}
 
 	/**
